@@ -126,6 +126,9 @@
   .tag.verified{ background:var(--green-tint); color:var(--green); }
   .tag.warn{ background:#FFF3E9; color:var(--orange); }
   .tag.info{ background:var(--blue-tint); color:var(--blue-deep); }
+  .tag.live{ background:var(--green-tint); color:var(--green); }
+  .tag.mock{ background:var(--bg-soft); color:var(--ink-soft); border:1px solid var(--border); }
+  .live-listing .tag{ margin:0 0 0 8px; vertical-align:middle; }
   .why{ margin-top:22px; background:var(--blue-tint); border-radius:12px; padding:20px 24px; }
   .why h4{ margin:0 0 10px; font-size:.95rem; font-weight:800; color:var(--blue-deep); }
   .why ul{ margin:0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
@@ -526,6 +529,9 @@
             ? `<img class="thumb-img" src="${escapeHtml(safeImg)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">${placeholder}`
             : placeholder;
           const displayName = l.product_name ? escapeHtml(l.product_name) : escapeHtml(l.marketplace);
+          const dataTag = l.is_real
+            ? '<span class="tag live">Live data</span>'
+            : '<span class="tag mock">Sample data</span>';
           const sourceLine = l.product_name
             ? `<div class="source-line">${escapeHtml(l.marketplace)}${l.seller_name ? ' · ' + escapeHtml(l.seller_name) : ''}</div>`
             : (l.seller_name ? `<div class="source-line">${escapeHtml(l.seller_name)}</div>` : '');
@@ -536,7 +542,7 @@
             : priceText;
           html += `<div class="live-listing ${isWin ? 'win' : ''}">
             <div class="info">${thumb}
-              <div><div class="name">${displayName}</div>${sourceLine}
+              <div><div class="name">${displayName}${dataTag}</div>${sourceLine}
               <div class="meta">${l.is_official_seller ? '✓ Official' : 'Unverified'} · ★ ${l.rating ?? '—'} · ${l.in_stock === false ? 'Out of stock' : (l.delivery_days != null ? l.delivery_days + ' day delivery' : 'Delivery time not listed')}${(l.price + (l.shipping_cost||0)) > (window.__aimamu_budget || Infinity) ? ' · <span style="color:var(--orange);font-weight:700;">Over budget</span>' : ''}</div></div>
             </div>
             <div class="price">${priceHtml}</div>
