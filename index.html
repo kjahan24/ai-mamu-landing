@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ai MAMU — Don't search. Just describe what you want.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@700;800&family=Hind+Siliguri:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --blue:#1B5FEB;
+    --blue-deep:#123F9E;
+    --blue-tint:#EAF1FF;
+    --brand-red:#E02020;
+    --orange:#FF5A3C;
+    --green:#1E8E5A;
+    --green-tint:#E9F7EF;
+    --gold:#DE9B00;
+    --ink:#1A1A1A;
+    --ink-soft:#5F6368;
+    --ink-faint:#8A8F98;
+    --border:#E5E7EB;
+    --bg-soft:#F7F8FA;
+    --white:#FFFFFF;
+    --font: 'Inter', sans-serif;
+    --font-display: 'Poppins', sans-serif;
+    --font-bn: 'Hind Siliguri', sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; background:var(--white); color:var(--ink); font-family:var(--font); line-height:1.55; -webkit-font-smoothing:antialiased; }
+  a{ color:inherit; text-decoration:none; }
+  img,svg{ display:block; }
+  .bn{ font-family:var(--font-bn); }
+  .wrap{ max-width:1280px; margin:0 auto; padding:0 28px; }
+  .icon{ width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+  .topbar{ background:var(--bg-soft); border-bottom:1px solid var(--border); font-size:.83rem; }
+  .topbar .wrap{ display:flex; align-items:center; justify-content:space-between; height:42px; }
+  .topbar-left{ display:flex; align-items:center; gap:22px; color:var(--ink-soft); }
+  .topbar-left a{ color:var(--blue); font-weight:600; }
+  .topbar-left a:hover{ text-decoration:underline; }
+  .topbar-nav{ display:flex; gap:18px; }
+  .topbar-nav a{ color:var(--ink-soft); }
+  .topbar-nav a:hover{ color:var(--blue); }
+  .topbar-right{ display:flex; align-items:center; gap:20px; color:var(--ink-soft); }
+  .topbar-right .grp{ display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .topbar-right .grp:hover{ color:var(--blue); }
+  .langbtn{ border:1px solid var(--border); background:var(--white); border-radius:20px; padding:4px 12px; font-size:.78rem; font-weight:600; cursor:pointer; color:var(--ink); }
+  .langbtn:hover{ border-color:var(--blue); color:var(--blue); }
+
+  .mainbar{ padding:18px 0; border-bottom:1px solid var(--border); }
+  .mainbar .wrap{ display:flex; align-items:center; gap:18px; }
+  .brand{ display:flex; align-items:baseline; gap:2px; font-family:var(--font-display); font-weight:800; font-size:1.55rem; flex-shrink:0; white-space:nowrap; }
+  .brand .a{ color:var(--blue); }
+  .brand .u{ color:var(--blue); }
+  .brand .red{ color:var(--brand-red); }
+  .brand .dot{ color:var(--gold); }
+  .shopby{ display:flex; align-items:center; gap:4px; font-size:.88rem; font-weight:600; color:var(--ink-soft); border-right:1px solid var(--border); padding-right:16px; flex-shrink:0; cursor:pointer; white-space:nowrap; }
+  .shopby:hover{ color:var(--blue); }
+  .searchbar{ flex:1; display:flex; align-items:center; border:2px solid var(--ink); border-radius:30px; overflow:hidden; height:48px; min-width:220px; }
+  .searchbar .icn{ padding:0 12px 0 18px; color:var(--ink-soft); }
+  .searchbar input{ flex:1; border:none; outline:none; font-family:var(--font); font-size:1rem; padding:0 6px; background:transparent; color:var(--ink); min-width:0; }
+  .searchbar input::placeholder{ color:var(--ink-faint); }
+  .searchbar .cam{ padding:0 14px; color:var(--ink-soft); cursor:pointer; }
+  .searchbar select{ border:none; border-left:1px solid var(--border); background:var(--bg-soft); height:100%; padding:0 14px; font-family:var(--font); font-size:.85rem; color:var(--ink-soft); outline:none; cursor:pointer; }
+  .searchbar button{ height:100%; padding:0 26px; background:var(--blue); color:#fff; border:none; font-weight:700; font-size:.95rem; cursor:pointer; }
+  .searchbar button:hover{ background:var(--blue-deep); }
+  .advanced{ font-size:.85rem; color:var(--blue); font-weight:600; flex-shrink:0; }
+  .advanced:hover{ text-decoration:underline; }
+
+  .catbar{ border-bottom:1px solid var(--border); }
+  .catbar .wrap{ display:flex; gap:26px; padding:13px 28px; overflow-x:auto; }
+  .catbar a{ font-size:.86rem; font-weight:600; color:var(--ink-soft); white-space:nowrap; }
+  .catbar a:hover{ color:var(--blue); }
+  .catbar a.more{ color:var(--blue-deep); }
+
+  .hero{ padding:52px 0 40px; text-align:center; }
+  .hero h1{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.8rem,4vw,2.7rem); max-width:780px; margin:0 auto 16px; line-height:1.2; }
+  .hero p.sub{ color:var(--ink-soft); font-size:1.08rem; max-width:620px; margin:0 auto 8px; }
+  .hero p.bnline{ color:var(--ink-faint); font-size:.95rem; max-width:620px; margin:8px auto 0; }
+
+  .demo{ background:var(--bg-soft); padding:44px 0 60px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .demo-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px; }
+  .mode-note{ font-size:.8rem; color:var(--ink-faint); margin-bottom:22px; }
+  .mode-note.live{ color:var(--green); font-weight:600; }
+  .intent-result{ display:none; background:var(--white); border:1.5px solid var(--blue); border-radius:12px; padding:20px 22px; margin-bottom:22px; }
+  .intent-result h4{ margin:0 0 12px; font-size:.92rem; font-weight:800; color:var(--blue-deep); }
+  .intent-result .fields{ display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:10px; }
+  .intent-result .field label{ display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:3px; }
+  .intent-result .field span{ font-size:.92rem; font-weight:600; }
+  .intent-result .clarify{ background:#FFF3E9; color:var(--orange); border-radius:8px; padding:10px 14px; font-size:.86rem; margin-top:6px; }
+  .intent-result .loading{ font-size:.9rem; color:var(--ink-soft); }
+  .intent-result .error{ font-size:.9rem; color:var(--orange); }
+  .live-reason{ background:var(--green-tint); color:var(--green); border-radius:8px; padding:10px 14px; font-size:.86rem; margin-top:12px; font-weight:600; }
+  .live-listings{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .live-listing{ display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.85rem; }
+  .live-listing.win{ border:2px solid var(--green); background:var(--green-tint); }
+  .live-listing .name{ font-weight:700; }
+  .live-listing .meta{ color:var(--ink-soft); font-size:.78rem; }
+  .live-listing .price{ font-weight:800; font-family:var(--font-display); }
+  .sample-note{ font-size:.78rem; color:var(--ink-faint); margin:-8px 0 18px; }
+  .eyebrow{ font-size:.74rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); }
+  .demo-query{ font-size:1.02rem; color:var(--ink-soft); }
+  .demo-query strong{ color:var(--ink); }
+  .results{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  .card{ background:var(--white); border:1px solid var(--border); border-radius:12px; padding:18px; position:relative; transition:.2s; }
+  .card:hover{ box-shadow:0 10px 24px -12px rgba(0,0,0,0.15); }
+  .card.pick{ border:2px solid var(--blue); }
+  .ribbon{ position:absolute; top:-11px; left:16px; background:var(--blue); color:#fff; font-size:.68rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; padding:4px 10px; border-radius:20px; }
+  .thumb{ width:100%; height:100px; border-radius:8px; background:linear-gradient(135deg,#EEF1F6,#E3E7EE); display:flex; align-items:center; justify-content:center; color:var(--ink-faint); margin-bottom:14px; }
+  .card h3{ font-size:.95rem; font-weight:700; margin:0 0 6px; }
+  .card .seller{ font-size:.8rem; color:var(--ink-soft); margin-bottom:8px; }
+  .price{ font-family:var(--font-display); font-weight:800; font-size:1.25rem; margin-bottom:8px; }
+  .stars{ display:flex; align-items:center; gap:5px; font-size:.78rem; color:var(--ink-soft); margin-bottom:10px; }
+  .stars svg{ color:var(--gold); }
+  .tag{ display:inline-flex; align-items:center; gap:4px; font-size:.72rem; font-weight:700; padding:3px 9px; border-radius:20px; margin-right:6px; margin-bottom:4px; }
+  .tag.verified{ background:var(--green-tint); color:var(--green); }
+  .tag.warn{ background:#FFF3E9; color:var(--orange); }
+  .tag.info{ background:var(--blue-tint); color:var(--blue-deep); }
+  .why{ margin-top:22px; background:var(--blue-tint); border-radius:12px; padding:20px 24px; }
+  .why h4{ margin:0 0 10px; font-size:.95rem; font-weight:800; color:var(--blue-deep); }
+  .why ul{ margin:0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .why li{ display:flex; gap:8px; font-size:.86rem; color:var(--ink); align-items:flex-start; }
+  .why li svg{ color:var(--green); flex-shrink:0; margin-top:2px; }
+
+  .section{ padding:70px 0; }
+  .section-head{ text-align:center; max-width:640px; margin:0 auto 42px; }
+  .section-head h2{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,2.8vw,2.1rem); margin:10px 0 12px; }
+  .section-head p{ color:var(--ink-soft); font-size:1rem; margin:0; }
+
+  .promises{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  .p-card{ border:1px solid var(--border); border-radius:14px; padding:28px 22px; text-align:center; }
+  .roundel{ width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+  .roundel.blue{ background:var(--blue-tint); color:var(--blue); }
+  .roundel.green{ background:var(--green-tint); color:var(--green); }
+  .roundel.gold{ background:#FBF1DA; color:var(--gold); }
+  .p-card h3{ font-size:1.1rem; margin:0 0 8px; }
+  .p-card p{ color:var(--ink-soft); font-size:.92rem; margin:0; }
+
+  .how{ background:var(--bg-soft); }
+  .steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:22px; }
+  .step{ background:var(--white); border:1px solid var(--border); border-radius:14px; padding:22px 18px; }
+  .step .n{ width:34px; height:34px; border-radius:50%; border:2px solid var(--blue); color:var(--blue); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:.9rem; margin-bottom:14px; }
+  .step h3{ font-size:1rem; margin:0 0 6px; }
+  .step p{ font-size:.86rem; color:var(--ink-soft); margin:0; }
+
+  .trust-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+  .t-card{ border:1px solid var(--border); border-radius:14px; padding:22px; }
+  .t-card .top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .t-card h3{ font-size:.98rem; margin:0; }
+  .t-card .score{ font-family:var(--font-display); font-weight:800; font-size:1rem; }
+  .meter{ height:7px; border-radius:10px; background:var(--border); overflow:hidden; margin-bottom:12px; }
+  .meter span{ display:block; height:100%; border-radius:10px; }
+  .t-card p{ font-size:.86rem; color:var(--ink-soft); margin:0; }
+
+  .marketplaces{ text-align:center; }
+  .mp-row{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:8px; }
+  .mp-chip{ border:1.5px solid var(--border); border-radius:30px; padding:10px 20px; font-weight:700; font-size:.92rem; color:var(--ink); }
+  .mp-chip.soon{ color:var(--ink-faint); border-style:dashed; }
+
+  .cta{ background:var(--blue); color:#fff; text-align:center; }
+  .cta h2{ font-family:var(--font-display); font-weight:800; font-size:clamp(1.5rem,3vw,2.2rem); margin:0 0 10px; }
+  .cta p.bnline{ color:rgba(255,255,255,0.8); margin:0 0 26px; }
+  .cta-form{ display:flex; gap:0; max-width:460px; margin:0 auto; background:#fff; border-radius:30px; padding:5px; }
+  .cta-form input{ flex:1; border:none; outline:none; padding:10px 16px; font-family:var(--font); font-size:.95rem; border-radius:30px; }
+  .cta-form button{ background:var(--ink); color:#fff; border:none; border-radius:26px; padding:10px 22px; font-weight:700; cursor:pointer; }
+  .cta-form button:hover{ background:#000; }
+  .cta-msg{ margin-top:14px; font-size:.88rem; font-weight:600; min-height:1.2em; color:#fff; }
+
+  footer{ background:var(--ink); color:rgba(255,255,255,0.65); padding:30px 0; text-align:center; font-size:.85rem; }
+  footer .foot-note{ margin-top:6px; font-size:.78rem; color:rgba(255,255,255,0.4); }
+
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+  .reveal.in{ opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){ .reveal{ opacity:1; transform:none; transition:none; } html{ scroll-behavior:auto; } }
+
+  @media(max-width:980px){
+    .results{ grid-template-columns:1fr; }
+    .why ul{ grid-template-columns:1fr; }
+    .promises{ grid-template-columns:1fr; }
+    .steps{ grid-template-columns:repeat(2,1fr); }
+    .trust-cards{ grid-template-columns:1fr; }
+  }
+  @media(max-width:760px){
+    .topbar-nav, .topbar-left span.hitxt{ display:none; }
+    .mainbar .wrap{ flex-wrap:wrap; }
+    .shopby{ display:none; }
+    .searchbar{ order:3; width:100%; }
+    .advanced{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="topbar-left">
+        <span class="hitxt">Hi! <a href="#access">Get early access</a></span>
+        <div class="topbar-nav">
+          <a href="#how">How it works</a>
+          <a href="#promises">The 3 Promises</a>
+          <a href="#trust">Trust</a>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="langbtn" id="langToggle">বাংলা</button>
+        <div class="grp"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg> Deal Alerts</div>
+        <div class="grp"><svg class="icon" viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8Z"/></svg> Wishlist</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mainbar">
+    <div class="wrap">
+      <div class="brand"><span class="a">Ai</span>&nbsp;<span class="red">M</span><span class="u">A</span><span class="red">M</span><span class="u">U</span><span class="dot">.</span></div>
+      <div class="shopby">Shop by intent <svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;"><path d="M6 9l6 6 6-6"/></svg></div>
+      <form class="searchbar" id="heroForm">
+        <span class="icn"><svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input type="text" id="queryInput" placeholder="Describe what you want to buy…" aria-label="Describe what you want to buy">
+        <span class="cam"><svg class="icon" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2Z"/><circle cx="12" cy="13" r="4"/></svg></span>
+        <select aria-label="Marketplace scope">
+          <option>All Marketplaces</option>
+          <option>Daraz</option>
+          <option>Star Tech</option>
+          <option>Ryans</option>
+          <option>Pickaboo</option>
+        </select>
+        <button type="submit">Ask AI</button>
+      </form>
+      <a href="#demo" class="advanced">Advanced</a>
+    </div>
+  </div>
+
+  <div class="catbar">
+    <div class="wrap">
+      <a href="#demo">Daraz</a>
+      <a href="#demo">Star Tech</a>
+      <a href="#demo">Ryans</a>
+      <a href="#demo">Pickaboo</a>
+      <a href="#demo">Gadget &amp; Gear</a>
+      <a href="#marketplaces" class="more">+ More soon</a>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="wrap">
+      <h1 class="t" data-en="Don't search. Just describe what you want." data-bn="খুঁজতে হবে না। শুধু বলুন কী চান।">Don't search. Just describe what you want.</h1>
+      <p class="sub t" data-en="AI finds where, when, and at what price to buy it — across Bangladesh's trusted marketplaces." data-bn="AI খুঁজে বের করবে কোথায়, কখন এবং কত দামে কিনলে আপনার জন্য সবচেয়ে ভালো হবে।">AI finds where, when, and at what price to buy it — across Bangladesh's trusted marketplaces.</p>
+    </div>
+  </section>
+
+  <section class="demo" id="demo">
+    <div class="wrap">
+      <div class="demo-head reveal">
+        <span class="eyebrow t" data-en="AI RESULT" data-bn="AI-এর ফলাফল">AI RESULT</span>
+        <span class="demo-query">Showing best matches for <strong id="demoQueryText">"Cheapest RTX 5070 in Star Tech"</strong></span>
+      </div>
+      <p class="mode-note" id="modeNote">Demo preview mode — type your own request above to see the sample.</p>
+
+      <div class="intent-result" id="intentResult"></div>
+      <p class="sample-note">Star Tech listings above are live and real — other marketplaces shown are still sample data for now.</p>
+      <div class="results">
+        <div class="card pick reveal">
+          <span class="ribbon">AI Recommended</span>
+          <div class="thumb"><svg class="icon" viewBox="0 0 24 24" style="width:32px;height:32px;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+          <h3>ASUS RTX 5070 Dual OC 12GB</h3>
+          <div class="seller">Star Tech · Official Store</div>
+          <div class="price">৳ 78,900</div>
+          <div class="stars"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/></svg> 4.8 (2,140)</div>
+          <div>
+            <span class="tag verified">✓ Verified seller</span>
+            <span class="tag info">Lowest in 45 days</span>
+          </div>
+        </div>
+        <div class="card reveal">
+          <div class="thumb"><svg class="icon" viewBox="0 0 24 24" style="width:32px;height:32px;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+          <h3>ASUS RTX 5070 Dual OC 12GB</h3>
+          <div class="seller">Ryans</div>
+          <div class="price">৳ 81,200</div>
+          <div class="stars"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/></svg> 4.6 (980)</div>
+          <div>
+            <span class="tag warn">Limited stock</span>
+          </div>
+        </div>
+        <div class="card reveal">
+          <div class="thumb"><svg class="icon" viewBox="0 0 24 24" style="width:32px;height:32px;"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/></svg></div>
+          <h3>ASUS RTX 5070 Dual OC 12GB</h3>
+          <div class="seller">Daraz · Marketplace Seller</div>
+          <div class="price">৳ 76,500</div>
+          <div class="stars"><svg class="icon" viewBox="0 0 24 24" style="width:14px;height:14px;fill:currentColor;stroke:none;"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 16.8 5.5 21l2-7.5L2 9h7z"/></svg> 4.1 (312)</div>
+          <div>
+            <span class="tag warn">⚠ Unverified seller</span>
+          </div>
+        </div>
+      </div>
+      <div class="why reveal">
+        <h4>Why Ai MAMU recommends Star Tech</h4>
+        <ul>
+          <li><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M20 6 9 17l-5-5"/></svg> Official &amp; verified seller</li>
+          <li><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M20 6 9 17l-5-5"/></svg> Lowest verified price in 45 days</li>
+          <li><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px;"><path d="M20 6 9 17l-5-5"/></svg> Standard warranty + 2-day delivery</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="promises">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow t" data-en="THE 3 PROMISES" data-bn="৩টি প্রতিশ্রুতি">THE 3 PROMISES</span>
+        <h2>Right place. Right price. Right time.</h2>
+        <p>Every recommendation is checked against all three — or Ai MAMU won't suggest it.</p>
+      </div>
+      <div class="promises">
+        <div class="p-card reveal">
+          <div class="roundel blue"><svg class="icon" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <h3>Right Place</h3>
+          <p>Only official, verified sellers — checked on return history and delivery reliability.</p>
+        </div>
+        <div class="p-card reveal">
+          <div class="roundel green"><svg class="icon" viewBox="0 0 24 24"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+          <h3>Right Price</h3>
+          <p>Shipping, coupons, and fake discounts factored in — the real effective price, not the sticker.</p>
+        </div>
+        <div class="p-card reveal">
+          <div class="roundel gold"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <h3>Right Time</h3>
+          <p>If waiting means a better price, Ai MAMU tells you to wait — even if that costs us a sale.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section how" id="how">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow t" data-en="HOW IT WORKS" data-bn="কীভাবে কাজ করে">HOW IT WORKS</span>
+        <h2>Four steps, no searching.</h2>
+        <p>Just say what you want — AI handles the rest.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><div class="n">1</div><h3>Describe</h3><p>Tell it what you want, your budget, and where — in your own words.</p></div>
+        <div class="step reveal"><div class="n">2</div><h3>AI understands</h3><p>Intent, budget, and must-haves are parsed — one quick question if needed.</p></div>
+        <div class="step reveal"><div class="n">3</div><h3>AI compares</h3><p>Real prices, offers, and seller trust are checked across marketplaces.</p></div>
+        <div class="step reveal"><div class="n">4</div><h3>You decide</h3><p>Get a clear recommendation with the reason why — and why now.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="trust">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow t" data-en="TRUST &amp; EXPLAINABILITY" data-bn="বিশ্বাসযোগ্যতা">TRUST &amp; EXPLAINABILITY</span>
+        <h2>Every score, shown — not just claimed.</h2>
+        <p>Three checks run behind every recommendation.</p>
+      </div>
+      <div class="trust-cards">
+        <div class="t-card reveal">
+          <div class="top"><h3>Seller Trust Score</h3><span class="score" style="color:var(--blue)">92/100</span></div>
+          <div class="meter"><span style="width:92%; background:var(--blue)"></span></div>
+          <p>Return rate, delivery reliability, and complaint history combined.</p>
+        </div>
+        <div class="t-card reveal">
+          <div class="top"><h3>Deal Authenticity</h3><span class="score" style="color:var(--green)">87/100</span></div>
+          <div class="meter"><span style="width:87%; background:var(--green)"></span></div>
+          <p>Verified against real price history — not an inflated "before" price.</p>
+        </div>
+        <div class="t-card reveal">
+          <div class="top"><h3>Price Confidence</h3><span class="score" style="color:var(--gold)">95/100</span></div>
+          <div class="meter"><span style="width:95%; background:var(--gold)"></span></div>
+          <p>How fresh and verified the underlying price data is.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section marketplaces" id="marketplaces">
+    <div class="wrap">
+      <div class="section-head reveal" style="margin-bottom:20px;">
+        <span class="eyebrow">CURRENTLY SEARCHES</span>
+        <h2>Starting with Bangladesh — going global next.</h2>
+      </div>
+      <div class="mp-row reveal">
+        <span class="mp-chip">Daraz</span>
+        <span class="mp-chip">Star Tech</span>
+        <span class="mp-chip">Ryans</span>
+        <span class="mp-chip">Pickaboo</span>
+        <span class="mp-chip">Gadget &amp; Gear</span>
+        <span class="mp-chip soon">USA &amp; UK — coming soon</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta" id="access">
+    <div class="wrap" style="max-width:600px;">
+      <h2 class="t" data-en="Search less. Decide smarter. Buy better." data-bn="অনুসন্ধান কম। সিদ্ধান্ত স্মার্ট। কেনাকাটা ভালো।">Search less. Decide smarter. Buy better.</h2>
+      <p class="bnline">AI খুঁজে বের করবে কোথায়, কখন এবং কত দামে কিনলে আপনার জন্য সবচেয়ে লাভজনক হবে।</p>
+      <form class="cta-form" id="ctaForm">
+        <input type="email" required placeholder="Enter your email for early access" aria-label="Email">
+        <button type="submit">Notify me</button>
+      </form>
+      <p class="cta-msg" id="ctaMsg"></p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>Ai MAMU — an Intent-Based AI Shopping Companion</div>
+    <div class="foot-note">"Ai MAMU" is a working title — final brand name coming soon.</div>
+  </div>
+</footer>
+
+<script>
+  let bn = false;
+  const langBtn = document.getElementById('langToggle');
+  langBtn.addEventListener('click', () => {
+    bn = !bn;
+    document.querySelectorAll('.t').forEach(el => {
+      el.textContent = bn ? el.dataset.bn : el.dataset.en;
+    });
+    langBtn.textContent = bn ? 'English' : 'বাংলা';
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // ============================================
+  // BACKEND CONFIG — set this to match the port shown
+  // in your `npm run dev` terminal (check the terminal —
+  // it may not always be 4001 if that port was busy too).
+  // Leave empty '' to stay in demo preview mode.
+  // ============================================
+  const CONFIG = { API_BASE_URL: 'https://ai-mamu-backend.onrender.com' };
+
+  const modeNote = document.getElementById('modeNote');
+  if (CONFIG.API_BASE_URL) {
+    modeNote.textContent = 'Live AI — this reads your real request and compares real (mock) listings.';
+    modeNote.classList.add('live');
+  }
+
+  const queryInput = document.getElementById('queryInput');
+  const intentResult = document.getElementById('intentResult');
+  const demoQueryText = document.getElementById('demoQueryText');
+
+  async function runIntent(query) {
+    demoQueryText.textContent = `"${query}"`;
+    intentResult.style.display = 'block';
+    intentResult.innerHTML = '<p class="loading">Reading your request… <br><span style="font-size:.8rem;color:var(--ink-faint);">First request after a few idle minutes can take up to a minute — our free server is waking up. Thanks for your patience!</span></p>';
+    try {
+      const res = await fetch(`${CONFIG.API_BASE_URL}/api/shop`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, language: 'auto' })
+      });
+      if (!res.ok) throw new Error('Backend error');
+      const data = await res.json();
+      const sq = data.structured_query || data;
+
+      let html = '<h4>Here\'s what our AI understood</h4><div class="fields">';
+      const rows = [
+        ['Product', sq.product],
+        ['Category', sq.category],
+        ['Brand', sq.brand],
+        ['Budget', (sq.budget_min || sq.budget_max) ? `${sq.currency || 'BDT'} ${sq.budget_min ?? '—'} – ${sq.budget_max ?? '—'}` : null],
+        ['Marketplace', sq.marketplace_preference],
+      ];
+      rows.forEach(([label, val]) => {
+        if (val) html += `<div class="field"><label>${label}</label><span>${val}</span></div>`;
+      });
+      html += '</div>';
+      if (sq.needs_clarification && sq.clarifying_question) {
+        html += `<div class="clarify">🤔 ${sq.clarifying_question}</div>`;
+      }
+
+      if (Array.isArray(data.listings) && data.listings.length) {
+        window.__aimamu_budget = sq.budget_max || Infinity;
+        html += '<div class="live-listings">';
+        data.listings.forEach(l => {
+          const isWin = data.recommended && (l.marketplace === data.recommended.marketplace) && (l.seller_name === data.recommended.seller_name);
+          const eff = (l.price || 0) + (l.shipping_cost || 0);
+          html += `<div class="live-listing ${isWin ? 'win' : ''}">
+            <div><div class="name">${l.marketplace}${l.seller_name ? ' · ' + l.seller_name : ''}</div>
+            <div class="meta">${l.is_official_seller ? '✓ Official' : 'Unverified'} · ★ ${l.rating ?? '—'} · ${l.in_stock === false ? 'Out of stock' : (l.delivery_days != null ? l.delivery_days + ' day delivery' : 'Delivery time not listed')}${(l.price + (l.shipping_cost||0)) > (window.__aimamu_budget || Infinity) ? ' · <span style="color:var(--orange);font-weight:700;">Over budget</span>' : ''}</div></div>
+            <div class="price">${l.currency || 'BDT'} ${eff.toLocaleString()}</div>
+          </div>`;
+        });
+        html += '</div>';
+      }
+      if (data.recommendation_reason) {
+        html += `<div class="live-reason">✓ ${data.recommendation_reason}</div>`;
+      }
+      intentResult.innerHTML = html;
+    } catch (err) {
+      intentResult.innerHTML = '<p class="error">Could not reach the AI backend — it may still be waking up from idle. Please wait a few seconds and try again.</p>';
+    }
+  }
+
+  document.getElementById('heroForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = queryInput.value.trim();
+    if (CONFIG.API_BASE_URL && query) {
+      runIntent(query);
+    }
+    document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+  });
+
+  const ctaForm = document.getElementById('ctaForm');
+  const ctaMsg = document.getElementById('ctaMsg');
+  ctaForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    ctaMsg.textContent = "You're on the list. We'll notify you at launch.";
+    ctaForm.reset();
+  });
+</script>
+
+</body>
+</html>
