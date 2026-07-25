@@ -94,11 +94,17 @@
   .intent-result .error{ font-size:.9rem; color:var(--orange); }
   .live-reason{ background:var(--green-tint); color:var(--green); border-radius:8px; padding:10px 14px; font-size:.86rem; margin-top:12px; font-weight:600; }
   .live-listings{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
-  .live-listing{ display:flex; justify-content:space-between; align-items:center; border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.85rem; }
+  .live-listing{ display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.85rem; }
   .live-listing.win{ border:2px solid var(--green); background:var(--green-tint); }
+  .live-listing .info{ display:flex; align-items:center; gap:10px; min-width:0; }
+  .live-listing .thumb-img{ width:44px; height:44px; border-radius:6px; object-fit:cover; flex-shrink:0; background:var(--bg-soft); border:1px solid var(--border); }
   .live-listing .name{ font-weight:700; }
+  .live-listing .source-line{ color:var(--ink-soft); font-size:.78rem; font-weight:500; margin-top:2px; }
   .live-listing .meta{ color:var(--ink-soft); font-size:.78rem; }
-  .live-listing .price{ font-weight:800; font-family:var(--font-display); }
+  .live-listing .price{ font-weight:800; font-family:var(--font-display); white-space:nowrap; }
+  .live-listing .price a{ color:var(--blue); text-decoration:none; }
+  .live-listing .price a:hover{ text-decoration:underline; }
+  .live-listing .price a::after{ content:" ↗"; font-size:.7em; font-weight:600; }
   .sample-note{ font-size:.78rem; color:var(--ink-faint); margin:-8px 0 18px; }
   .eyebrow{ font-size:.74rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--blue); }
   .demo-query{ font-size:1.02rem; color:var(--ink-soft); }
@@ -451,6 +457,24 @@
   const intentResult = document.getElementById('intentResult');
   const demoQueryText = document.getElementById('demoQueryText');
 
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, (c) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+  }
+
+  // Only ever render http(s) URLs the backend gave us — never trust a URL
+  // into an href/src without checking its scheme first.
+  function safeHttpUrl(url) {
+    if (!url) return null;
+    try {
+      const parsed = new URL(url);
+      return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : null;
+    } catch {
+      return null;
+    }
+  }
+
   async function runIntent(query) {
     demoQueryText.textContent = `"${query}"`;
     intentResult.style.display = 'block';
@@ -485,12 +509,31 @@
         window.__aimamu_budget = sq.budget_max || Infinity;
         html += '<div class="live-listings">';
         data.listings.forEach(l => {
-          const isWin = data.recommended && (l.marketplace === data.recommended.marketplace) && (l.seller_name === data.recommended.seller_name);
+          const isWin = data.recommended
+            && l.marketplace === data.recommended.marketplace
+            && l.seller_name === data.recommended.seller_name
+            && l.product_name === data.recommended.product_name
+            && l.price === data.recommended.price;
           const eff = (l.price || 0) + (l.shipping_cost || 0);
+          const safeImg = safeHttpUrl(l.image_url);
+          const thumb = safeImg
+            ? `<img class="thumb-img" src="${escapeHtml(safeImg)}" alt="" loading="lazy" onerror="this.style.display='none'">`
+            : `<div class="thumb-img"></div>`;
+          const displayName = l.product_name ? escapeHtml(l.product_name) : escapeHtml(l.marketplace);
+          const sourceLine = l.product_name
+            ? `<div class="source-line">${escapeHtml(l.marketplace)}${l.seller_name ? ' · ' + escapeHtml(l.seller_name) : ''}</div>`
+            : (l.seller_name ? `<div class="source-line">${escapeHtml(l.seller_name)}</div>` : '');
+          const safeUrl = safeHttpUrl(l.product_url);
+          const priceText = `${l.currency || 'BDT'} ${eff.toLocaleString()}`;
+          const priceHtml = safeUrl
+            ? `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer">${priceText}</a>`
+            : priceText;
           html += `<div class="live-listing ${isWin ? 'win' : ''}">
-            <div><div class="name">${l.marketplace}${l.seller_name ? ' · ' + l.seller_name : ''}</div>
-            <div class="meta">${l.is_official_seller ? '✓ Official' : 'Unverified'} · ★ ${l.rating ?? '—'} · ${l.in_stock === false ? 'Out of stock' : (l.delivery_days != null ? l.delivery_days + ' day delivery' : 'Delivery time not listed')}${(l.price + (l.shipping_cost||0)) > (window.__aimamu_budget || Infinity) ? ' · <span style="color:var(--orange);font-weight:700;">Over budget</span>' : ''}</div></div>
-            <div class="price">${l.currency || 'BDT'} ${eff.toLocaleString()}</div>
+            <div class="info">${thumb}
+              <div><div class="name">${displayName}</div>${sourceLine}
+              <div class="meta">${l.is_official_seller ? '✓ Official' : 'Unverified'} · ★ ${l.rating ?? '—'} · ${l.in_stock === false ? 'Out of stock' : (l.delivery_days != null ? l.delivery_days + ' day delivery' : 'Delivery time not listed')}${(l.price + (l.shipping_cost||0)) > (window.__aimamu_budget || Infinity) ? ' · <span style="color:var(--orange);font-weight:700;">Over budget</span>' : ''}</div></div>
+            </div>
+            <div class="price">${priceHtml}</div>
           </div>`;
         });
         html += '</div>';
