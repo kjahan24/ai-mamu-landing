@@ -474,6 +474,20 @@
     }[c]));
   }
 
+  // Handles every null/equal/one-sided combination of budget_min/budget_max
+  // explicitly, rather than the previous "X – Y" template that produced
+  // nonsense like "BDT — –1000" whenever only one side was set.
+  function formatBudgetRange(sq) {
+    const min = typeof sq.budget_min === 'number' ? Math.max(0, sq.budget_min) : null;
+    const max = typeof sq.budget_max === 'number' ? Math.max(0, sq.budget_max) : null;
+    if (min == null && max == null) return null;
+    const currency = sq.currency || 'BDT';
+    if (min != null && max != null) {
+      return min === max ? `${currency} ${min}` : `${currency} ${min} – ${max}`;
+    }
+    return max != null ? `Up to ${currency} ${max}` : `${currency} ${min}+`;
+  }
+
   // Only ever render http(s) URLs the backend gave us — never trust a URL
   // into an href/src without checking its scheme first.
   function safeHttpUrl(url) {
@@ -508,7 +522,7 @@
         ['Product', sq.product],
         ['Category', sq.category],
         ['Brand', sq.brand],
-        ['Budget', (sq.budget_min || sq.budget_max) ? `${sq.currency || 'BDT'} ${sq.budget_min ?? '—'} – ${sq.budget_max ?? '—'}` : null],
+        ['Budget', formatBudgetRange(sq)],
         ['Marketplace', sq.marketplace_preference],
       ];
       rows.forEach(([label, val]) => {
