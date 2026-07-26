@@ -90,9 +90,15 @@
   .intent-result .field label{ display:block; font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); margin-bottom:3px; }
   .intent-result .field span{ font-size:.92rem; font-weight:600; }
   .intent-result .clarify{ background:#FFF3E9; color:var(--orange); border-radius:8px; padding:10px 14px; font-size:.86rem; margin-top:6px; }
+  .clarify-reply-form{ display:flex; gap:8px; margin-top:8px; }
+  .clarify-reply-input{ flex:1; min-width:0; border:1px solid var(--orange); border-radius:20px; padding:6px 14px; font-family:var(--font); font-size:.85rem; outline:none; color:var(--ink); background:#fff; }
+  .clarify-reply-input::placeholder{ color:var(--ink-faint); }
+  .clarify-reply-form button{ flex-shrink:0; border:none; border-radius:20px; padding:6px 18px; background:var(--orange); color:#fff; font-weight:700; font-size:.85rem; cursor:pointer; }
+  .clarify-reply-form button:hover{ opacity:.9; }
   .intent-result .loading{ font-size:.9rem; color:var(--ink-soft); }
   .intent-result .error{ font-size:.9rem; color:var(--orange); }
   .live-reason{ background:var(--green-tint); color:var(--green); border-radius:8px; padding:10px 14px; font-size:.86rem; margin-top:12px; font-weight:600; }
+  .live-reason.no-results{ background:var(--bg-soft); color:var(--ink-soft); }
   .live-listings{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
   .live-listing{ display:flex; justify-content:space-between; align-items:center; gap:12px; border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.85rem; }
   .live-listing.win{ border:2px solid var(--green); background:var(--green-tint); }
@@ -480,8 +486,11 @@
     }
   }
 
-  async function runIntent(query) {
-    demoQueryText.textContent = `"${query}"`;
+  // displayQuery is what the "Showing best matches for" label shows — the
+  // original question, not the growing accumulated-context string sent to
+  // the backend on follow-up turns (see the clarify-reply-form handler).
+  async function runIntent(query, displayQuery = query) {
+    demoQueryText.textContent = `"${displayQuery}"`;
     intentResult.style.display = 'block';
     intentResult.innerHTML = '<p class="loading">Reading your request… <br><span style="font-size:.8rem;color:var(--ink-faint);">First request after a few idle minutes can take up to a minute — our free server is waking up. Thanks for your patience!</span></p>';
     try {
@@ -507,7 +516,12 @@
       });
       html += '</div>';
       if (sq.needs_clarification && sq.clarifying_question) {
-        html += `<div class="clarify">🤔 ${sq.clarifying_question}</div>`;
+        html += `<div class="clarify">🤔 ${escapeHtml(sq.clarifying_question)}
+          <form class="clarify-reply-form" data-context="${escapeHtml(query)}" data-display="${escapeHtml(displayQuery)}">
+            <input type="text" class="clarify-reply-input" placeholder="${bn ? 'উত্তর লিখুন…' : 'Type your answer…'}" aria-label="${bn ? 'আপনার উত্তর' : 'Your reply'}">
+            <button type="submit">${bn ? 'পাঠান' : 'Send'}</button>
+          </form>
+        </div>`;
       }
 
       if (Array.isArray(data.listings) && data.listings.length) {
@@ -551,13 +565,35 @@
         html += '</div>';
       }
       if (data.recommendation_reason) {
-        html += `<div class="live-reason">✓ ${data.recommendation_reason}</div>`;
+        html += data.recommended
+          ? `<div class="live-reason">✓ ${escapeHtml(data.recommendation_reason)}</div>`
+          : `<div class="live-reason no-results">${escapeHtml(data.recommendation_reason)}</div>`;
       }
       intentResult.innerHTML = html;
     } catch (err) {
       intentResult.innerHTML = '<p class="error">Could not reach the AI backend — it may still be waking up from idle. Please wait a few seconds and try again.</p>';
     }
   }
+
+  // Event delegation on the stable container, not the form itself — runIntent()
+  // replaces intentResult's whole innerHTML on every turn, which would silently
+  // drop a listener attached directly to the (re-created) form each time.
+  intentResult.addEventListener('submit', (e) => {
+    const form = e.target.closest('.clarify-reply-form');
+    if (!form) return;
+    e.preventDefault();
+
+    const input = form.querySelector('.clarify-reply-input');
+    const reply = input.value.trim();
+    if (!reply) return;
+
+    // Accumulates every turn's context so a second follow-up (if the AI is
+    // still unsure) keeps the full conversation, not just the latest reply —
+    // but the display label stays pinned to the original question throughout.
+    const priorContext = form.dataset.context || '';
+    const displayQuery = form.dataset.display || priorContext;
+    runIntent(`${priorContext}\n\nAdditional info from user: ${reply}`, displayQuery);
+  });
 
   document.getElementById('heroForm').addEventListener('submit', (e) => {
     e.preventDefault();
